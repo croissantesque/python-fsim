@@ -73,8 +73,8 @@ seeds = {
         "quantity": 0,
         "water_req": 0,
         "growth_req": 100,
-        "water_bonus": [10, 5],
-        "passive_per_turn": 1.5,
+        "water_bonus": [0, 0],
+        "passive_per_turn": 0.7,
         "sell_price": 85
     },
     "carrots": {
@@ -368,16 +368,15 @@ def water_plot(targets, plots, resources, seeds):
 
         plots_owned = resources["max_plots"]
         
-        # Calculate factor: increases by 0.1 for every plot over 8.
+        # calculate extra factor: increases by 0.1 for every plot over 8.
         surcharge_factor = 1 + max(0, (plots_owned - 8) / 10) 
         
-        # Calculate the final water cost (ceil() ensures 1.1 becomes 2)
+        # final water cost (ceil() rounds up, so 1.1 becomes 2). prevents water cost from becoming redundant over time
         water_cost = math.ceil(base_water_req * surcharge_factor) 
         
         if resources["water"] < water_cost:
             print(f"Not enough water! You need {water_cost} water to water plot {plot_index}.")
             break
-        # ----------------------------------
 
         if plot["watered"] >= 2:
             continue
@@ -392,11 +391,11 @@ def water_plot(targets, plots, resources, seeds):
         plot["progress"] += bonus
         plot["watered"] += 1
         
-        # Only count turns used if the base water requirement was > 0
         if base_water_req > 0:
             watered_count += 1
         
-        watered_raw_count += 1
+        watered_raw_count += 1 #this is needed so we can count how much times water has been done compared to water used.
+        #otherwise we'd be printing no plots watered even if we watered corn
 
 
         print(f"Watered plot {plot_index} ({crop_name}) +{bonus} growth. Water cost: {water_cost}. Remaining water: {resources['water']}")
@@ -745,7 +744,7 @@ def print_seed_info():
     print(" - Beans   : Quickest growth, extremely low profit. Essential for the expansion of your farm via animals..")
     print(" - Carrots : Fast growth, decent profit. A great place to start your farm!")
     print(" - Wheat   : Fast growth, slightly less profit. Brings with it a chance of double harvest.")
-    print(" - Corn    : Slowest growth, better profit. The best money crop, despite its relatively long growth rate. Be careful though, daily tax doesn't care if it's grown!")
+    print(" - Corn    : Slowest growth, better profit. Requires no water!")
 
 def print_commands():
     print("Commands:")
@@ -758,7 +757,7 @@ def print_commands():
     print(" - feed                      : Feed all animals, or as many as possible.")
     print(" - collect                   : Collect your animals' produce.")
     print(" - wanimals                  : Water all your animals, or as many as possible.")
-    print(" - rest                      : Skip the rest of today, if you run out of things to do.")
+    print(" - wait <turns               : Wait x turns.")
     print(" - info                      : Display information on seeds and plants.")
     print(" - commands                  : List all commands, in case you need help!.")
     
@@ -851,7 +850,7 @@ def random_event(plots, resources, seeds):
         money_loss = min(resources['money'], money_loss) # Don't lose more money than you have
 
         resources['money'] -= money_loss
-        print(f"\n--- Unlucky! Thieves stole ${money_loss} in the night!")
+        print(f"\n--- Unlucky! Thieves and bandits stole ${money_loss} in the night!")
     else:
         # No event
         pass
@@ -872,7 +871,7 @@ def passive_grow(plots, seeds):
     Passive growth scales with how many times the plot has been watered *today*.
     - watered == 0 : passive growth heavily penalised
     - watered == 1 : normal passive
-    - watered == 2 : increase, but not so much that water twice is better than water once for 2 crops
+    - watered == 2 : increase, but not so much that it's worth if not urgent
     """
     # multipliers can be tuned 
     multipliers = {0: 0.5, 1: 1.0, 2: 1.3}
@@ -887,8 +886,10 @@ def passive_grow(plots, seeds):
                 watered_times = plot.get("watered", 0)
                 # cap watered times to 2 in case of unexpected values
                 watered_times = 2 if watered_times > 2 else watered_times
-                multiplier = multipliers.get(watered_times, 0.25)
-                plot["progress"] += base_passive * multiplier * drought_penalty
+                multiplier = multipliers.get(watered_times)
+                if crop_name == "corn": plot["progress"] += base_passive * drought_penalty * 1 #corn doesnt need watering so doesnt slow without watering
+                else: plot["progress"] += base_passive * multiplier * drought_penalty
+                
             elif plot["progress"] > crop_info["growth_req"]:
                 plot["ready"] = True
 
@@ -906,14 +907,13 @@ def day_reset(plots, resources, animals_owned, animal_info):
         print(f"{lost_water} water dried up today.")
 
     base_tax = 5
-    day_tax = min(40, int(0.5 * day)) # Your existing day-based tax
+    day_tax = min(40, int(0.5 * day)) # increases by 50 cents a day so player eventually gets capped and forced to upgrade (i hope)
     plot_count = resources["max_plots"]
     
-    # This is the key: The multiplier scales with plot count.
-    # The exponent (-5) makes the first 5 plots have almost no tax.
+
     plot_tax_multiplier = 1.15
     
-    # Tax per plot increases exponentially after 5 plots
+    # Tax per plot increases after 5 plots (the base )
     plot_tax = int(plot_count * (plot_tax_multiplier ** max(0, plot_count - 5)))
 
     tax = int(base_tax + day_tax + plot_tax)
