@@ -36,7 +36,7 @@ animal_info = {
     "pig": {
         "feed_req": 3,
         "water_req": 4,
-        "product_price": 65,
+        "product_price": 70,
         "product_name" : "pork",
         "purchase_price": 1200,
         "double_chance": 0.33,
@@ -541,7 +541,7 @@ def shop(resources, seeds, plots, animal_info, animals_owned):
 
         if choice == "1":
             print("Seeds Available:")
-            print(" [1]  $10 --- Beans")
+            print(" [1]  $7 --- Beans")
             print(" [2]  $20 --- Carrots")
             print(" [3]  $30 --- Wheat")
             print(" [4]  $50 --- Corn")
@@ -566,7 +566,7 @@ def shop(resources, seeds, plots, animal_info, animals_owned):
                 continue
 
             seed_map = {"1": "beans", "2": "carrots", "3": "wheat", "4": "corn"}
-            price_map = {"1": 10, "2": 20, "3": 30, "4": 50}
+            price_map = {"1": 7, "2": 20, "3": 30, "4": 50}
 
             seed_name = seed_map[words[0]]
             price = price_map[words[0]]
@@ -837,7 +837,7 @@ def random_event(plots, resources, seeds):
     elif event_chance < 0.40:
         loss_resource = random.choice(["wheat", "corn", "carrots", "beans", "eggs"])
         if resources[loss_resource] > 0:
-            percent_loss = random.uniform(0.2, 0.4)
+            percent_loss = random.uniform(0.05, 0.15)
             amount_loss = math.ceil(resources[loss_resource] * percent_loss)
             resources[loss_resource] = max(0, resources[loss_resource] - amount_loss)
             print(f" --- Unlucky! Strong winds damage your storage! You lost {amount_loss} {loss_resource}!")
