@@ -64,7 +64,7 @@ seeds = {
         "quantity": 0, 
         "water_req": 1,
         "growth_req": 50,
-        "water_bonus": [10, 5],  # index 0 = first water, index 1 = second water
+        "water_bonus": [8, 5],  # index 0 = first water, index 1 = second water
         "passive_per_turn": 1,
         "sell_price": 50,
         "double_chance": 0.17
@@ -74,14 +74,14 @@ seeds = {
         "water_req": 0,
         "growth_req": 100,
         "water_bonus": [0, 0],
-        "passive_per_turn": 0.7,
+        "passive_per_turn": 1.6,
         "sell_price": 85
     },
     "carrots": {
         "quantity": 0,
         "water_req": 1,
         "growth_req": 35,
-        "water_bonus": [10, 6],
+        "water_bonus": [8, 6],
         "passive_per_turn": 0.8,
         "sell_price": 40
     },
@@ -89,7 +89,7 @@ seeds = {
         "quantity": 0,
         "water_req": 1,
         "growth_req": 30,
-        "water_bonus": [8,5],
+        "water_bonus": [6,5],
         "passive_per_turn": 0.8,
         "sell_price": 14
     }
@@ -327,7 +327,7 @@ def generate_mission(resources, plots, seeds):
             print("Your mission has expired.")
             current_mission = None
     if current_mission is not None:
-        print(f"You have {mission_time} days left to deliver {current_mission['quantity']} {current_mission['crop']} to the shop for {current_mission['reward']} {current_mission['type']}!")
+        print(f"You have {mission_time} days left to [deliver] {current_mission['quantity']} {current_mission['crop']} for {current_mission['reward']} {current_mission['type']}!")
     
 def water_plot(targets, plots, resources, seeds):
     """
@@ -517,7 +517,7 @@ def plot_cost(resources):
     cheap_limit = 8  # first x plots are cheap
     extra_plots = max(0, resources["max_plots"] - cheap_limit)
     
-    # CORRECTED: Sums the number of pig and cow objects owned
+    #Sums the number of pig and cow objects owned
     animals_eligible = len(animals_owned["pig"]) + len(animals_owned["cow"]) 
     
     reduction = 1 + (0.1 * animals_eligible)
@@ -760,6 +760,7 @@ def print_commands():
     print(" - wait <turns               : Wait x turns.")
     print(" - info                      : Display information on seeds and plants.")
     print(" - commands                  : List all commands, in case you need help!.")
+    print(" - deliver                   : Deliver resources needed to complete a mission, if one is currently going. ")
     
 
 def show_instructions():
