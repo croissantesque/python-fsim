@@ -24,11 +24,11 @@ resources = {
 
 animal_info = {
     "chicken": {
-        "feed_req": 2,
+        "feed_req": 1,
         "water_req": 3,
         "product_price": 30,
         "product_name" : "eggs",
-        "purchase_price": 400,
+        "purchase_price": 300,
         "double_chance": 0.5,
 
     },
@@ -72,7 +72,7 @@ seeds = {
     "corn": {
         "quantity": 0,
         "water_req": 0,
-        "growth_req": 100,
+        "growth_req": 130,
         "water_bonus": [0, 0],
         "passive_per_turn": 1.6,
         "sell_price": 85
@@ -187,7 +187,7 @@ def feed_animals(turn, animals_owned, animal_info, resources, plots):
             
     # 3. Consume turns based on total actions
     if fed_count > 0:
-        turns_used = math.ceil(fed_count / 2)
+        turns_used = math.ceil(fed_count / 3)
         print(f"Feeding finished. Fed a total of {fed_count} beans, used {turns_used} turns.")
         
         new_turn = turn 
@@ -263,7 +263,7 @@ def water_animals(turn, animals_owned, animal_info, resources, plots):
             
     # 3. Consume turns based on total actions
     if watered_count > 0:
-        turns_used = math.ceil(watered_count / 2)
+        turns_used = math.ceil(watered_count / 3)
         print(f"Watering finished. Used a total of {watered_count} water, taking up {turns_used} turns.")
         
         new_turn = turn 
@@ -287,7 +287,7 @@ def use_turn(turn, animal_info, animals_owned, plots):
     check_grown(plots, seeds)
     passive_grow(plots, seeds)
 
-    if turn >= 21:
+    if turn >= 31:
         turn = 1
         day += 1
         print(f"\n--- A new day begins... \n- Day {day}")
@@ -312,8 +312,8 @@ def generate_mission(resources, plots, seeds):
             print(f"\n--- Mission received! ---")        
         elif mission_chance < 0.35:
             mission_crop = random.choice(["wheat", "carrots"])
-            mission_quantity = random.randint(2, 6)
-            mission_reward = int(45 * mission_quantity * 1.1 / 1.5)
+            mission_quantity = random.randint(2, 4)
+            mission_reward = int(30 * mission_quantity * 1.5)
             mission_time = random.randint(2,4)
             mission_type = "water"
 
@@ -369,7 +369,7 @@ def water_plot(targets, plots, resources, seeds):
         plots_owned = resources["max_plots"]
         
         # calculate extra factor: increases by 0.1 for every plot over 8.
-        surcharge_factor = 1 + max(0, (plots_owned - 8) / 10) 
+        surcharge_factor = 1 + max(0, (plots_owned - 10) / 10) 
         
         # final water cost (ceil() rounds up, so 1.1 becomes 2). prevents water cost from becoming redundant over time
         water_cost = math.ceil(base_water_req * surcharge_factor) 
@@ -405,7 +405,7 @@ def water_plot(targets, plots, resources, seeds):
         return 0
 
     # Cost 1 turn per 2 plots (rounded up)
-    turns_used = math.ceil(watered_count / 1.5)
+    turns_used = math.ceil(watered_count / 2)
     return turns_used
 
 
@@ -464,7 +464,7 @@ def harvest_plot(plots, resources, seeds, target_plot):
         calc_available_plots(plots, resources)
         
         if resources['available_plots'] == previous_available: print("There is nothing to harvest!"); return 0
-        else: print("Finished harvesting!"); return math.ceil(harvest_count/2)
+        else: print("Finished harvesting!"); return math.ceil(harvest_count/3)
                     
                 
     if target_plot not in plots: print("You don't own this plot!"); return 0
@@ -589,11 +589,11 @@ def shop(resources, seeds, plots, animal_info, animals_owned):
             print(" [2]  $35  --- Carrots")
             print(" [3]  $50  --- Wheat")
             print(" [4]  $85  --- Corn")
-            print(" [5]  $25  --- Eggs")
+            print(" [5]  $30  --- Eggs")
             print(" [6]  $65  --- Pork")
             print(" [7]  $125 --- Milk")
             crop_map = {"1": "beans", "2": "carrots", "3": "wheat", "4": "corn", "5": "eggs", "6": "pork", "7": "milk"}
-            price_map = {"1": 14, "2": 40, "3": 50, "4": 85, "5": 25, "6": 65, "7": 100}
+            price_map = {"1": 14, "2": 40, "3": 50, "4": 85, "5": 30, "6": 65, "7": 100}
 
             
             select = input("Select an option: " )
@@ -764,24 +764,29 @@ def print_commands():
     
 
 def show_instructions():
-    print("="*40)
+    print("=" * 40)
     print("       WELCOME TO FSIM")
-    print("="*40)
+    print("=" * 40)
     print("\nObjective:")
     print(" - Plant seeds, water crops, and harvest to earn money.")
-    print(" - Expand your farm with more plots and water as you grow.")
-    print(" - Manage your resources wisely!\n")
-    
+    print(" - Expand your farm with more plots and animals as you grow.")
+    print(" - Manage your water and feed wisely — nature hates you.\n")
+
     print_commands()
-    
-    print("Tips:")
-    print(" - Watering is essential for plant growth - you can water up to twice a day, no more.")
-    print(" - Spare beans are important......")
-    print(" - Expand plots when you have money - but have a buffer! Tax increases with a bigger farm.")
-    print(" - Don't ever forget to feed and water your animals!")
-    print(" - Day resets every 20 turns: watered count resets.\n")
-    print("="*40)
-    print("Good luck, farmer!\n")
+
+    print("\nTips (use these if you value your sanity):")
+    print(" - Beans keep your animals alive. Don't sell them all. Chickens eat beans, pigs eat carrots, cows eat wheat. No feed = sickness = death = tears.")
+    print(" - Water runs your entire farm. Crops need it. Animals drink it. Droughts steal it. Stock up every time you can afford to.")
+    print(" - Corn is the lazy farmer's best friend. It doesn't need watering, so it'll still grow while you're rationing water for your chickens.")
+    print(" - Buy animals slowly. Each chicken drinks 3 water and eats 1 bean a day. Don't buy more mouths than you can feed.")
+    print(" - Expand carefully. Plots get expensive after 8. Taxes and upkeep climb daily, so keep emergency funds or you'll be broke before the rain comes.")
+    print(" - Feed and water animals every single day. Miss once, and they'll get sick for days. Miss again, and you'll need a tiny gravestone.")
+    print(" - Don't just spam 'wait.' Turns still count for taxes and sickness, and your animals don't magically self-care while you daydream.")
+    print(" - Corn and chickens print money. Corn when water's tight, chickens when it's not. Keep that balance, and you'll survive the midgame spiral.\n")
+
+    print("=" * 40)
+    print("Good luck, farmer. You'll need it.\n")
+
 
 def examine_plots(plots, seeds):
     for plot_number, plot in plots.items():
@@ -801,7 +806,7 @@ def random_event(plots, resources, seeds):
     if event_chance < 0.05:
         # Drought
         global drought_days_left
-        drought_days_left = random.randint(3,5)
+        drought_days_left = random.randint(2,4)
         lost_water = random.randint(5,15)
         resources['water'] = max(0, resources['water'] - lost_water)
         print(f"\n--- Unlucky! A drought hits. You lose {lost_water} water. Drought days left: {drought_days_left} ---")
@@ -814,7 +819,7 @@ def random_event(plots, resources, seeds):
                 crop_name = plot['growing']
                 crop_info = seeds[crop_name]
                 plot["watered"] += 1
-        resources["water"] += random.randint(10,40)
+        resources["water"] += random.randint(10,50)
 
     elif event_chance < 0.22:
         # Pest attack
@@ -829,7 +834,7 @@ def random_event(plots, resources, seeds):
         # Bonus seeds
         bonus_seed = random.choice(list(seeds.keys()))
         quantity = random.randint(2,4)
-        free_money = random.randint(20,50)
+        free_money = random.randint(20,70)
         resources['money'] += free_money
         seeds[bonus_seed]['quantity'] += quantity
         print(f"\n--- Lucky! You find a bonus: {quantity} {bonus_seed} seeds and ${free_money}! ---")
@@ -842,12 +847,12 @@ def random_event(plots, resources, seeds):
             resources[loss_resource] = max(0, resources[loss_resource] - amount_loss)
             print(f" --- Unlucky! Strong winds damage your storage! You lost {amount_loss} {loss_resource}!")
         else:
-            money_loss = random.randint(20,40)
+            money_loss = random.randint(15,30)
             resources["money"] = max(0, resources["money"] - money_loss)
             print(f" --- Unlucky! A sudden repair fee costs you ${money_loss}!")
-    elif event_chance < 0.47:
+    elif event_chance < 0.45:
         # Loss scales with the size of the farm (max_plots) to keep it relevant
-        money_loss = random.randint(20, 50) + (resources["max_plots"] * 5)
+        money_loss = random.randint(5, 30) + (resources["max_plots"] * 3)
         money_loss = min(resources['money'], money_loss) # Don't lose more money than you have
 
         resources['money'] -= money_loss
