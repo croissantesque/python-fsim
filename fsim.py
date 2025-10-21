@@ -770,7 +770,7 @@ def show_instructions():
     print("\nObjective:")
     print(" - Plant seeds, water crops, and harvest to earn money.")
     print(" - Expand your farm with more plots and animals as you grow.")
-    print(" - Manage your water and feed wisely — nature hates you.\n")
+    print(" - Manage your water and feed wisely â€” nature hates you.\n")
 
     print_commands()
 
@@ -1090,5 +1090,4 @@ while True:
         take_turn = False
 
     if take_turn == True:
-
         turn = use_turn(turn, animal_info, animals_owned, plots)
