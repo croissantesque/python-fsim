@@ -208,7 +208,7 @@ def collect_produce(resources, animals_owned, animal_info):
             product = animal_info[animal_type]["product_name"]
             if animal["production_ready"] == True:
                 if random.random() < animal_info[animal_type]["double_chance"]:
-                    print(f"!!! Collected double {animal_info[animal_type]["product_name"]} from {animal['id']}!")
+                    print(f"!!! Collected double {animal_info[animal_type]['product_name']} from {animal['id']}!")
                     resources[product] += 2
                     collected += 1
                 else: print(f"Collected 1 {product} from {animal['id']}"); resources[product] += 1; collected += 1
@@ -1091,3 +1091,4 @@ while True:
 
     if take_turn == True:
         turn = use_turn(turn, animal_info, animals_owned, plots)
+
