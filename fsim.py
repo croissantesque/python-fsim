@@ -1,3 +1,4 @@
+
 import random
 import math
 
@@ -61,7 +62,7 @@ animals_owned = {
 }
 seeds = {
     "wheat": {
-        "quantity": 0, 
+        "quantity": 0,
         "water_req": 1,
         "growth_req": 50,
         "water_bonus": [8, 5],  # index 0 = first water, index 1 = second water
@@ -124,7 +125,7 @@ def grow_plant(plantType, plots, resources, seeds):
         plots[empty_plot]["growing"] = plantType
         print(f"You plant some {plantType} in plot {empty_plot}.")
         return True
-    else: 
+    else:
         if seeds[plantType]["quantity"] < 1: print(f"\nYou have no more {plantType} seeds! Enter the shop to buy more.\n"); return False
         else: print("You have no plots available! Enter the shop to buy more plots or wait til harvest is ready."); return False
 
@@ -145,61 +146,61 @@ def examine_animals(animals_owned, animal_info):
             print(f"{animal['id']}: fed {animal['fed']}/{animal_info[animal_type]['feed_req']} beans today. Watered {animal['watered']}/{animal_info[animal_type]['water_req']} water today.")
             print(f"Ready for {animal_info[animal_type]['product_name']} to be collected") if animal['production_ready'] == True else print(f"No {animal_info[animal_type]['product_name']} for collection.")
             print(f"This animal is sick! {animal['sick_days_left']} days left.\n") if animal["sick"] == True else print("This animal is healthy.")
-def feed_animals(turn, animals_owned, animal_info, resources, plots): 
-    """ 
+def feed_animals(turn, animals_owned, animal_info, resources, plots):
+    """
     feed all owned animals or as many as possible, skip over already fed.
     Uses 1 turn per 3 total beans fed (rounded up).
     """
 
     total_animals = sum(len(animal_list) for animal_list in animals_owned.values())
-    if total_animals < 1: 
+    if total_animals < 1:
         print("You don't own any animals!")
         return turn
-    
-    fed_count = 0 
+
+    fed_count = 0
 
     for animal_type, animal_list in animals_owned.items():
         feed_req = animal_info[animal_type]["feed_req"]
 
         for animal in animal_list:
-            current_fed = animal.get("fed", 0) 
-            
+            current_fed = animal.get("fed", 0)
+
             if current_fed < feed_req:
-                
+
                 # Use a while loop to feed the animal until its requirement is met
                 while animal.get("fed", 0) < feed_req:
-                    
+
                     if resources["beans"] > 0:
                         # Consume bean, increment fed_count and animal's fed status
                         animal["fed"] = animal.get("fed", 0) + 1
                         fed_count += 1
                         resources["beans"] -= 1
-                        
+
                         print(f"Fed {animal['id']} (1 bean). Fed count: {animal['fed']}/{feed_req}.")
-                        
+
                     else: # Ran out of beans
                         print(f"Ran out of beans! Could not fully feed {animal_type} {animal['id']}.")
-                        break 
-                
+                        break
+
         # If resources ran out, no need to check the rest of the animals
         if resources["beans"] < 1:
             break
-            
+
     # 3. Consume turns based on total actions
     if fed_count > 0:
         turns_used = math.ceil(fed_count / 3)
         print(f"Feeding finished. Fed a total of {fed_count} beans, used {turns_used} turns.")
-        
-        new_turn = turn 
-        for _ in range(turns_used): 
-            new_turn = use_turn(new_turn, animal_info, animals_owned, plots) 
-        
+
+        new_turn = turn
+        for _ in range(turns_used):
+            new_turn = use_turn(new_turn, animal_info, animals_owned, plots)
+
         return new_turn # Return the final, updated turn number
-        
-    else: 
+
+    else:
         print(f"All animals are fed or you had no beans.")
         return turn
-    
+
 def collect_produce(resources, animals_owned, animal_info):
     if sum(len(animal_list) for animal_list in animals_owned.values()) < 1: print("You don't own any animals!"); return 0
     collected = 0
@@ -213,7 +214,7 @@ def collect_produce(resources, animals_owned, animal_info):
                     collected += 1
                 else: print(f"Collected 1 {product} from {animal['id']}"); resources[product] += 1; collected += 1
                 animal["production_ready"] = False
-            
+
             else: print(f"{animal['id']} is sick and did not produce any {product}") if animal["sick"] == True else print(f"{animal['id']}'s {animal_info[animal_type]['product_name']} have already been collected today.")
     if collected > 0:
         print("Finished collecting!")
@@ -221,62 +222,62 @@ def collect_produce(resources, animals_owned, animal_info):
     else: print("There was nothing to collect."); return 0
 
 
-def water_animals(turn, animals_owned, animal_info, resources, plots): 
-    """ 
+def water_animals(turn, animals_owned, animal_info, resources, plots):
+    """
     water all owned animals or as many as possible, skip over already fed.
     Uses 1 turn per 2 total water used (rounded up).
     """
 
     total_animals = sum(len(animal_list) for animal_list in animals_owned.values())
-    if total_animals < 1: 
+    if total_animals < 1:
         print("You don't own any animals!")
         return turn
-    
-    watered_count = 0 
+
+    watered_count = 0
 
     for animal_type, animal_list in animals_owned.items():
         water_req = animal_info[animal_type]["water_req"]
 
         for animal in animal_list:
-            current_watered = animal.get("watered", 0) 
-            
+            current_watered = animal.get("watered", 0)
+
             if current_watered < water_req:
-                
+
                 # Use a while loop to hydrate the animal until its requirement is met
                 while animal.get("watered", 0) < water_req:
-                    
+
                     if resources["water"] > 0:
                         # Consume water, increment count and animal's  status
                         animal["watered"] = animal.get("watered", 0) + 1
                         watered_count += 1
                         resources["water"] -= 1
-                        
+
                         print(f"Watered {animal['id']} (1 water). Watered count: {animal['watered']}/{water_req}.")
-                        
+
                     else: # Ran out of water
                         print(f"Ran out of water! Could not fully water {animal['id']}.")
-                        break 
-                
+                        break
+
         # If resources ran out, no need to check the rest of the animals
         if resources["water"] < 1:
             break
-            
+
     # 3. Consume turns based on total actions
     if watered_count > 0:
         turns_used = math.ceil(watered_count / 3)
         print(f"Watering finished. Used a total of {watered_count} water, taking up {turns_used} turns.")
-        
-        new_turn = turn 
-        for _ in range(turns_used): 
-            new_turn = use_turn(new_turn, animal_info, animals_owned, plots) 
-        
+
+        new_turn = turn
+        for _ in range(turns_used):
+            new_turn = use_turn(new_turn, animal_info, animals_owned, plots)
+
         return new_turn # Return the final, updated turn number
-        
-    else: 
+
+    else:
         print(f"All animals are watered or you had no water.")
         return turn
-    
-    
+
+
 
 
 
@@ -291,7 +292,7 @@ def use_turn(turn, animal_info, animals_owned, plots):
         turn = 1
         day += 1
         print(f"\n--- A new day begins... \n- Day {day}")
-        day_reset(plots, resources, animals_owned, animal_info) 
+        day_reset(plots, resources, animals_owned, animal_info)
         sync_plots(resources, plots) #safeguard
     return turn
 
@@ -309,7 +310,7 @@ def generate_mission(resources, plots, seeds):
             mission_type = "money"
 
             current_mission = {"crop": mission_crop, "quantity": mission_quantity, "reward": mission_reward, 'type': mission_type}
-            print(f"\n--- Mission received! ---")        
+            print(f"\n--- Mission received! ---")
         elif mission_chance < 0.35:
             mission_crop = random.choice(["wheat", "carrots"])
             mission_quantity = random.randint(2, 4)
@@ -319,7 +320,7 @@ def generate_mission(resources, plots, seeds):
 
             current_mission = {"crop": mission_crop, "quantity": mission_quantity, "reward": mission_reward, "type": mission_type}
             print(f"\n--- Mission received! ---")
-        
+
         else: current_mission = None
     else:
         mission_time -= 1
@@ -328,7 +329,7 @@ def generate_mission(resources, plots, seeds):
             current_mission = None
     if current_mission is not None:
         print(f"You have {mission_time} days left to [deliver] {current_mission['quantity']} {current_mission['crop']} for {current_mission['reward']} {current_mission['type']}!")
-    
+
 def water_plot(targets, plots, resources, seeds):
     """
     Water one or multiple plots.
@@ -364,16 +365,16 @@ def water_plot(targets, plots, resources, seeds):
         crop_info = seeds[crop_name]
 
         # Base water requirement (0 for Corn, 1 for others)
-        base_water_req = crop_info["water_req"] 
+        base_water_req = crop_info["water_req"]
 
         plots_owned = resources["max_plots"]
-        
+
         # calculate extra factor: increases by 0.1 for every plot over 8.
-        surcharge_factor = 1 + max(0, (plots_owned - 10) / 10) 
-        
+        surcharge_factor = 1 + max(0, (plots_owned - 10) / 10)
+
         # final water cost (ceil() rounds up, so 1.1 becomes 2). prevents water cost from becoming redundant over time
-        water_cost = math.ceil(base_water_req * surcharge_factor) 
-        
+        water_cost = math.ceil(base_water_req * surcharge_factor)
+
         if resources["water"] < water_cost:
             print(f"Not enough water! You need {water_cost} water to water plot {plot_index}.")
             break
@@ -390,10 +391,10 @@ def water_plot(targets, plots, resources, seeds):
         resources["water"] -= water_cost # Uses the calculated cost
         plot["progress"] += bonus
         plot["watered"] += 1
-        
+
         if base_water_req > 0:
             watered_count += 1
-        
+
         watered_raw_count += 1 #this is needed so we can count how much times water has been done compared to water used.
         #otherwise we'd be printing no plots watered even if we watered corn
 
@@ -416,7 +417,7 @@ def check_grown(plots, seeds):
         crop_name = plot["growing"]
         crop_info = seeds[crop_name]
         if plot["progress"] >= crop_info["growth_req"]:
-            if crop_name in ["wheat", "corn"]: 
+            if crop_name in ["wheat", "corn"]:
                 form = "has"
             else: form = "have"
 
@@ -462,11 +463,11 @@ def harvest_plot(plots, resources, seeds, target_plot):
                 harvest_count += 1
 
         calc_available_plots(plots, resources)
-        
+
         if resources['available_plots'] == previous_available: print("There is nothing to harvest!"); return 0
         else: print("Finished harvesting!"); return math.ceil(harvest_count/3)
-                    
-                
+
+
     if target_plot not in plots: print("You don't own this plot!"); return 0
     if plots[target_plot]["growing"] is None: print("There's nothing here to harvest!"); return 0
     if plots[target_plot]["ready"] is False: print(f"Not ready for harvest yet!"); return 0
@@ -479,8 +480,8 @@ def harvest_plot(plots, resources, seeds, target_plot):
             harvest_amount = 2
             print(f"!!! You harvest double the {crop_name} from plot {target_plot} !!!")
 
-    
-        
+
+
     resources[crop_name] += harvest_amount
 
     plots[target_plot]["growing"] = None
@@ -516,10 +517,10 @@ def plot_cost(resources):
     base_cost = 90  # cost for the 6th plot
     cheap_limit = 8  # first x plots are cheap
     extra_plots = max(0, resources["max_plots"] - cheap_limit)
-    
+
     #Sums the number of pig and cow objects owned
-    animals_eligible = len(animals_owned["pig"]) + len(animals_owned["cow"]) 
-    
+    animals_eligible = len(animals_owned["pig"]) + len(animals_owned["cow"])
+
     reduction = 1 + (0.1 * animals_eligible)
     cost = base_cost * (1.5 ** extra_plots) / reduction
     return int(cost)  # round down to nearest dollar
@@ -536,7 +537,7 @@ def shop(resources, seeds, plots, animal_info, animals_owned):
         print("[5] Buy Animals")
         print("[0] Exit Shop")
 
-        
+
         choice = input("Select an option:")
 
         if choice == "1":
@@ -595,13 +596,13 @@ def shop(resources, seeds, plots, animal_info, animals_owned):
             crop_map = {"1": "beans", "2": "carrots", "3": "wheat", "4": "corn", "5": "eggs", "6": "pork", "7": "milk"}
             price_map = {"1": 14, "2": 40, "3": 50, "4": 85, "5": 30, "6": 65, "7": 100}
 
-            
+
             select = input("Select an option: " )
 
             if select not in crop_map:
                 print("Invalid selection.")
                 continue
-            elif select in ["1", "2", "3", "4", "5", "6", "7"]: 
+            elif select in ["1", "2", "3", "4", "5", "6", "7"]:
                 crop_name = crop_map[select]
 
                 if resources[crop_name] == 0: print(f"You don't have any {crop_name} to sell!"); continue
@@ -613,22 +614,22 @@ def shop(resources, seeds, plots, animal_info, animals_owned):
                     except ValueError: print("Invalid input."); continue
                     if quantity > resources[crop_name]: print("You don't have that many!"); continue
                     else:
-                        
+
                         resources[crop_name] -= quantity
                         resources["money"] += crop_price * quantity
                         print(f"Sold {quantity} {crop_name}!")
                         continue
 
 
-            
 
-            
+
+
         if choice == "3":
             print("Water Packages:\n")
             print(" [1] Small Refill (10 Water) --- $15")
             print(" [2] Medium Refill (50 Water) --- $70")
             print(" [3] Large Refill (100 Water) --- $130")
-            
+
             pick = input("Select a package: ")
             water_packages = {
                 "1": (10, 15),
@@ -761,7 +762,7 @@ def print_commands():
     print(" - info                      : Display information on seeds and plants.")
     print(" - commands                  : List all commands, in case you need help!.")
     print(" - deliver                   : Deliver resources needed to complete a mission, if one is currently going. ")
-    
+
 
 def show_instructions():
     print("=" * 40)
@@ -793,7 +794,7 @@ def examine_plots(plots, seeds):
         crop_name = plot["growing"]
         if crop_name is None:
             print(f"Plot {plot_number} is empty.")
-        
+
         else:
             crop_info = seeds[crop_name]
             if plot['progress'] >= crop_info["growth_req"]:
@@ -879,7 +880,7 @@ def passive_grow(plots, seeds):
     - watered == 1 : normal passive
     - watered == 2 : increase, but not so much that it's worth if not urgent
     """
-    # multipliers can be tuned 
+    # multipliers can be tuned
     multipliers = {0: 0.5, 1: 1.0, 2: 1.3}
     global drought_days_left
     drought_penalty = 0.65 if drought_days_left > 0 else 1.0
@@ -895,7 +896,7 @@ def passive_grow(plots, seeds):
                 multiplier = multipliers.get(watered_times)
                 if crop_name == "corn": plot["progress"] += base_passive * drought_penalty * 1 #corn doesnt need watering so doesnt slow without watering
                 else: plot["progress"] += base_passive * multiplier * drought_penalty
-                
+
             elif plot["progress"] > crop_info["growth_req"]:
                 plot["ready"] = True
 
@@ -915,10 +916,10 @@ def day_reset(plots, resources, animals_owned, animal_info):
     base_tax = 5
     day_tax = min(40, int(0.5 * day)) # increases by 50 cents a day so player eventually gets capped and forced to upgrade (i hope)
     plot_count = resources["max_plots"]
-    
+
 
     plot_tax_multiplier = 1.15
-    
+
     # Tax per plot increases after 5 plots (the base )
     plot_tax = int(plot_count * (plot_tax_multiplier ** max(0, plot_count - 5)))
 
@@ -938,25 +939,25 @@ def day_reset(plots, resources, animals_owned, animal_info):
             if animal["fed"] < animal_info[animal_type]["feed_req"]:
                 animal["sick"] = True
                 animal["sick_days_left"] += random.randint(1, 3)
-                print(f"You didn't feed your {animal_type} yesterday! It's sick and will not produce {animal_info[animal_type]['product_name']} for another {animal["sick_days_left"]} days.")
+                print(f"You didn't feed your {animal_type} yesterday! It's sick and will not produce {animal_info[animal_type]['product_name']} for another {animal['sick_days_left']} days.")
 
             if animal["watered"] < animal_info[animal_type]["water_req"]:
                 animal["sick"] = True
                 animal["sick_days_left"] += random.randint(1, 3)
-                print(f"You didn't water your {animal_type} yesterday! It's sick and will not produce {animal_info[animal_type]['product_name']} for another {animal["sick_days_left"]} days.")
-            
+                print(f"You didn't water your {animal_type} yesterday! It's sick and will not produce {animal_info[animal_type]['product_name']} for another {animal['sick_days_left']} days.")
+
             animal["fed"] = 0
             animal["watered"] = 0
 
-            if animal["sick"] == True: print(f"Your {animal_type} is sick for another {animal["sick_days_left"]} days."); animal["production_ready"] = False
+            if animal["sick"] == True: print(f"Your {animal_type} is sick for another {animal['sick_days_left']} days."); animal["production_ready"] = False
             if random.random() < 0.05 and animal["sick"] == False:
                 animal["sick"] = True
                 animal["sick_days_left"] = random.randint(2,4)
                 animal["production_ready"] = False
-                print(f" --- Unlucky! Your {animal_type} has grown sick!\n It won't produce {animal_info[animal_type]['product_name']} for another {animal["sick_days_left"]} days.")
+                print(f" --- Unlucky! Your {animal_type} has grown sick!\n It won't produce {animal_info[animal_type]['product_name']} for another {animal['sick_days_left']} days.")
 
 
-    for animal_type, animal_list in animals_owned.items():    
+    for animal_type, animal_list in animals_owned.items():
         survivors = []
         for animal in animal_list:
             if animal["sick"] == True and random.random() < 0.15:
@@ -969,7 +970,7 @@ def day_reset(plots, resources, animals_owned, animal_info):
             animal["id"] = f"{animal_type}_{i}"
 
 
-    
+
 
     if resources["money"] < 0:
         print("\n !!!! GAME OVER !!!")
@@ -1021,7 +1022,7 @@ while True:
     if command == "animals":
         examine_animals(animals_owned, animal_info)
         take_turn = False
-        
+
     if command == "wait":
         try:
             target = int(target)
@@ -1046,7 +1047,7 @@ while True:
         take_turn = False
     if command == "feed":
         turn = feed_animals(turn, animals_owned, animal_info, resources, plots)
-    
+
     if command == "wanimals":
         turn = water_animals(turn, animals_owned, animal_info, resources, plots)
 
@@ -1055,17 +1056,17 @@ while True:
             for i in range(harvest_plot(plots, resources, seeds, target)):
                 turn = use_turn(turn, animal_info, animals_owned, plots)
             take_turn = False
-        else: 
+        else:
             try:
                 target_plot = int(target)
                 take_turn = harvest_plot(plots, resources, seeds, target_plot)
             except ValueError:
                 print("Invalid plot number! Must be a number.")
                 continue
-    
-    
 
-        
+
+
+
     if command in ["shop", "s"]:
         shop(resources,seeds,plots, animal_info, animals_owned)
         take_turn = False
@@ -1073,7 +1074,7 @@ while True:
     if command in ["inventory", "i"]:
         print_inventory(resources, seeds)
         take_turn = False
-    
+
     if command in ["plots", "p"]:
         examine_plots(plots, seeds)
         take_turn = False
@@ -1081,10 +1082,10 @@ while True:
     if command == "info":
         print_seed_info()
         take_turn = False
-    
+
     if command == "deliver":
         take_turn = deliver_mission(resources)
-    
+
     if command == "commands":
         print_commands()
         take_turn = False
