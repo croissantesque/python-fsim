@@ -25,6 +25,7 @@ resources = {
 
 animal_info = {
     "chicken": {
+        "feed_type": "beans",
         "feed_req": 1,
         "water_req": 3,
         "product_price": 30,
@@ -35,19 +36,21 @@ animal_info = {
     },
 
     "pig": {
-        "feed_req": 3,
+        "feed_type": "carrots",
+        "feed_req": 1,
         "water_req": 4,
-        "product_price": 70,
+        "product_price": 95,
         "product_name" : "pork",
         "purchase_price": 1200,
-        "double_chance": 0.33,
+        "double_chance": 0.35,
 
     },
 
     "cow": {
-        "feed_req": 4,
+        "feed_type": "wheat",
+        "feed_req": 2,
         "water_req": 5,
-        "product_price": 125,
+        "product_price": 130,
         "product_name" : "milk",
         "purchase_price": 2500,
         "double_chance": 0.25,
@@ -161,6 +164,7 @@ def feed_animals(turn, animals_owned, animal_info, resources, plots):
 
     for animal_type, animal_list in animals_owned.items():
         feed_req = animal_info[animal_type]["feed_req"]
+        feed_type = animal_info[animal_type]["feed_type"]
 
         for animal in animal_list:
             current_fed = animal.get("fed", 0)
@@ -170,26 +174,26 @@ def feed_animals(turn, animals_owned, animal_info, resources, plots):
                 # Use a while loop to feed the animal until its requirement is met
                 while animal.get("fed", 0) < feed_req:
 
-                    if resources["beans"] > 0:
-                        # Consume bean, increment fed_count and animal's fed status
+                    if resources[feed_type] > 0:
+                        # Consume food, increment fed_count and animal's fed status
                         animal["fed"] = animal.get("fed", 0) + 1
                         fed_count += 1
-                        resources["beans"] -= 1
+                        resources[feed_type] -= 1
 
-                        print(f"Fed {animal['id']} (1 bean). Fed count: {animal['fed']}/{feed_req}.")
+                        print(f"Fed {animal['id']} (1 {feed_type}). Fed count: {animal['fed']}/{feed_req}.")
 
                     else: # Ran out of beans
-                        print(f"Ran out of beans! Could not fully feed {animal_type} {animal['id']}.")
+                        print(f"Ran out of {feed_type}! Could not fully feed {animal_type} {animal['id']}.")
                         break
 
         # If resources ran out, no need to check the rest of the animals
-        if resources["beans"] < 1:
-            break
+        if resources[feed_type] < 1:
+            continue
 
     # 3. Consume turns based on total actions
     if fed_count > 0:
         turns_used = math.ceil(fed_count / 3)
-        print(f"Feeding finished. Fed a total of {fed_count} beans, used {turns_used} turns.")
+        print(f"Feeding finished, used {turns_used} turns.")
 
         new_turn = turn
         for _ in range(turns_used):
@@ -538,7 +542,7 @@ def shop(resources, seeds, plots, animal_info, animals_owned):
         print("[0] Exit Shop")
 
 
-        choice = input("Select an option:")
+        choice = input("Select an option: ")
 
         if choice == "1":
             print("Seeds Available:")
@@ -547,30 +551,23 @@ def shop(resources, seeds, plots, animal_info, animals_owned):
             print(" [3]  $30 --- Wheat")
             print(" [4]  $50 --- Corn")
 
-            choice = input("Select a type and quantity: ")
-            words = choice.split()
-            if len(words) < 2:
-                print("Invalid input. (format: <seed number> <quantity>)")
-                continue
-            if words[0] not in ["1", "2", "3", "4"]:
-                print("That's not an available seed number!")
-                continue
-
-            try:
-                quantity = int(words[1])
-            except ValueError:
-                print("That's not a valid quantity!")
-                continue
-
-            if quantity < 1:
-                print("You must purchase at least one seed.")
-                continue
-
+            purchase = input("Select a type: ")
             seed_map = {"1": "beans", "2": "carrots", "3": "wheat", "4": "corn"}
             price_map = {"1": 7, "2": 20, "3": 30, "4": 50}
 
-            seed_name = seed_map[words[0]]
-            price = price_map[words[0]]
+            if purchase not in seed_map:
+                print("That's not a valid selection!")
+                continue
+
+            seed_name = seed_map[purchase]
+            price = price_map[purchase]
+
+            max_purchase = resources["money"] // price
+            quantity = input(f"How many would you like to buy? (You can afford {max_purchase}): ")
+
+            try: quantity = int(quantity)
+            except ValueError: print("That's not a number!"); continue
+
             total_cost = price * quantity
 
             if resources["money"] < total_cost:
@@ -587,17 +584,17 @@ def shop(resources, seeds, plots, animal_info, animals_owned):
 
             print("Sell Produce:")
             print(" [1]  $14  --- Beans")
-            print(" [2]  $35  --- Carrots")
+            print(" [2]  $40  --- Carrots")
             print(" [3]  $50  --- Wheat")
             print(" [4]  $85  --- Corn")
             print(" [5]  $30  --- Eggs")
-            print(" [6]  $65  --- Pork")
-            print(" [7]  $125 --- Milk")
+            print(" [6]  $95  --- Pork")
+            print(" [7]  $130 --- Milk")
             crop_map = {"1": "beans", "2": "carrots", "3": "wheat", "4": "corn", "5": "eggs", "6": "pork", "7": "milk"}
-            price_map = {"1": 14, "2": 40, "3": 50, "4": 85, "5": 30, "6": 65, "7": 100}
+            price_map = {"1": 14, "2": 40, "3": 50, "4": 85, "5": 30, "6": 95, "7": 130}
 
 
-            select = input("Select an option: " )
+            select = input("Select an option:" )
 
             if select not in crop_map:
                 print("Invalid selection.")
@@ -617,7 +614,7 @@ def shop(resources, seeds, plots, animal_info, animals_owned):
 
                         resources[crop_name] -= quantity
                         resources["money"] += crop_price * quantity
-                        print(f"Sold {quantity} {crop_name}!")
+                        print(f"Sold {quantity} {crop_name} for ${crop_price * quantity}!")
                         continue
 
 
@@ -716,15 +713,18 @@ def shop(resources, seeds, plots, animal_info, animals_owned):
 
             # 4. Process the Purchase (Subtract Resources)
             resources["money"] -= animal_price
-            print(f"Spent ${animal_price} on a {animal_name}.")
 
             # Subtract materials
             for name, quantity in material_reqs.items():
                 resources[name] -= quantity
                 print(f"Spent {quantity} {name.capitalize()}.")
-                print(f"You bought a {animal_name}!")
+            print(f"You bought a {animal_name}!")
+            while True:
+                name = input("Enter a name: ")
+                if not name.strip(): print("Name can't be empty!"); continue
+                else: break
             info = {
-                "id": f"{animal_name}_{len(animals_owned[animal_name]) + 1}",
+                "id": name,
                 "fed": 0,
                 "watered": 0,
                 "sick": False,
@@ -771,7 +771,7 @@ def show_instructions():
     print("\nObjective:")
     print(" - Plant seeds, water crops, and harvest to earn money.")
     print(" - Expand your farm with more plots and animals as you grow.")
-    print(" - Manage your water and feed wisely â€” nature hates you.\n")
+    print(" - Manage your water and feed wisely as nature hates you.\n")
 
     print_commands()
 
@@ -797,14 +797,14 @@ def examine_plots(plots, seeds):
 
         else:
             crop_info = seeds[crop_name]
-            if plot['progress'] >= crop_info["growth_req"]:
+            if plot['ready'] == True:
                 print(f"The {crop_name} in plot {plot_number} are ready for harvest!")
-            else: print(f"Plot {plot_number}: currently growing {crop_name} // {int(plot['progress'])}/{crop_info['growth_req']} maturity // watered {plot['watered']} times today")
+            else: print(f"Plot {plot_number}: currently growing {crop_name} // {plot['progress']:.2f}/{crop_info['growth_req']} maturity // watered {plot['watered']} times today")
 
 def random_event(plots, resources, seeds):
     event_chance = random.random()
 
-    if event_chance < 0.05:
+    if event_chance < 0.03:
         # Drought
         global drought_days_left
         drought_days_left = random.randint(2,4)
@@ -822,7 +822,7 @@ def random_event(plots, resources, seeds):
                 plot["watered"] += 1
         resources["water"] += random.randint(10,50)
 
-    elif event_chance < 0.22:
+    elif event_chance < 0.20:
         # Pest attack
         affected_plot = random.choice(list(plots.keys()))
         if plots[affected_plot]['growing'] is not None and plots[affected_plot]['progress'] > 0:
@@ -831,7 +831,7 @@ def random_event(plots, resources, seeds):
             plots[affected_plot]["ready"] = False
             print(f"\n--- Unlucky! Pests hit plot {affected_plot} and destroy {int(lost_progress)} growth points! ---")
 
-    elif event_chance < 0.30:
+    elif event_chance < 0.27:
         # Bonus seeds
         bonus_seed = random.choice(list(seeds.keys()))
         quantity = random.randint(2,4)
@@ -840,7 +840,7 @@ def random_event(plots, resources, seeds):
         seeds[bonus_seed]['quantity'] += quantity
         print(f"\n--- Lucky! You find a bonus: {quantity} {bonus_seed} seeds and ${free_money}! ---")
 
-    elif event_chance < 0.40:
+    elif event_chance < 0.33:
         loss_resource = random.choice(["wheat", "corn", "carrots", "beans", "eggs"])
         if resources[loss_resource] > 0:
             percent_loss = random.uniform(0.05, 0.15)
@@ -851,7 +851,7 @@ def random_event(plots, resources, seeds):
             money_loss = random.randint(15,30)
             resources["money"] = max(0, resources["money"] - money_loss)
             print(f" --- Unlucky! A sudden repair fee costs you ${money_loss}!")
-    elif event_chance < 0.45:
+    elif event_chance < 0.40:
         # Loss scales with the size of the farm (max_plots) to keep it relevant
         money_loss = random.randint(5, 30) + (resources["max_plots"] * 3)
         money_loss = min(resources['money'], money_loss) # Don't lose more money than you have
@@ -966,8 +966,6 @@ def day_reset(plots, resources, animals_owned, animal_info):
             survivors.append(animal)
         animals_owned[animal_type] = survivors
 
-        for i, animal in enumerate(animals_owned[animal_type], start=1):
-            animal["id"] = f"{animal_type}_{i}"
 
 
 
@@ -975,7 +973,6 @@ def day_reset(plots, resources, animals_owned, animal_info):
     if resources["money"] < 0:
         print("\n !!!! GAME OVER !!!")
         print("You ran out of money to run your farm!")
-        print("haha noob git gud")
         exit()
     random_event(plots, resources, seeds)
     generate_mission(resources, plots, seeds)
