@@ -933,17 +933,17 @@ def day_reset(plots, resources, animals_owned, animal_info):
                 animal["sick_days_left"] -= 1
                 if animal["sick_days_left"] == 0:
                     animal["sick"] = False
-                    print(f"Your {animal_type} has recovered from its sickness and will now continue to produce {animal_info[animal_type]["product_name"]}")
+                    print(f"Your {animal_type} has recovered from its sickness and will now continue to produce {animal_info[animal_type]['product_name']}")
             animal["production_ready"] = True
             if animal["fed"] < animal_info[animal_type]["feed_req"]:
                 animal["sick"] = True
                 animal["sick_days_left"] += random.randint(1, 3)
-                print(f"You didn't feed your {animal_type} yesterday! It's sick and will not produce {animal_info[animal_type]["product_name"]} for another {animal["sick_days_left"]} days.")
+                print(f"You didn't feed your {animal_type} yesterday! It's sick and will not produce {animal_info[animal_type]['product_name']} for another {animal["sick_days_left"]} days.")
 
             if animal["watered"] < animal_info[animal_type]["water_req"]:
                 animal["sick"] = True
                 animal["sick_days_left"] += random.randint(1, 3)
-                print(f"You didn't water your {animal_type} yesterday! It's sick and will not produce {animal_info[animal_type]["product_name"]} for another {animal["sick_days_left"]} days.")
+                print(f"You didn't water your {animal_type} yesterday! It's sick and will not produce {animal_info[animal_type]['product_name']} for another {animal["sick_days_left"]} days.")
             
             animal["fed"] = 0
             animal["watered"] = 0
@@ -953,7 +953,7 @@ def day_reset(plots, resources, animals_owned, animal_info):
                 animal["sick"] = True
                 animal["sick_days_left"] = random.randint(2,4)
                 animal["production_ready"] = False
-                print(f" --- Unlucky! Your {animal_type} has grown sick!\n It won't produce {animal_info[animal_type]["product_name"]} for another {animal["sick_days_left"]} days.")
+                print(f" --- Unlucky! Your {animal_type} has grown sick!\n It won't produce {animal_info[animal_type]['product_name']} for another {animal["sick_days_left"]} days.")
 
 
     for animal_type, animal_list in animals_owned.items():    
@@ -1091,4 +1091,5 @@ while True:
 
     if take_turn == True:
         turn = use_turn(turn, animal_info, animals_owned, plots)
+
 
