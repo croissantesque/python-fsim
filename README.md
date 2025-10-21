@@ -1,3 +1,3 @@
 # python-fsim
-FSIM: Futile Struggle In Mud <br>
+FSIM <br> Farming Simulator: Infinite Malnutrition <br>
 simple economy terminal farming strategy game.
