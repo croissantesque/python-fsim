@@ -292,7 +292,7 @@ def use_turn(turn, animal_info, animals_owned, plots):
     check_grown(plots, seeds)
     passive_grow(plots, seeds)
 
-    if turn >= 31:
+    if turn >= 30:
         turn = 1
         day += 1
         print(f"\n--- A new day begins... \n- Day {day}")
@@ -332,7 +332,9 @@ def generate_mission(resources, plots, seeds):
             print("Your mission has expired.")
             current_mission = None
     if current_mission is not None:
-        print(f"You have {mission_time} days left to [deliver] {current_mission['quantity']} {current_mission['crop']} for {current_mission['reward']} {current_mission['type']}!")
+        base = f"You have {mission_time} days left to [deliver] {current_mission['quantity']} {current_mission['crop']} for "
+        ext = f"{current_mission['reward']} {current_mission['type']}!" if current_mission['type'] == "water" else f"${current_mission['reward']}!"
+        print(base, ext)
 
 def water_plot(targets, plots, resources, seeds):
     """
@@ -411,7 +413,10 @@ def water_plot(targets, plots, resources, seeds):
 
     # Cost 1 turn per 2 plots (rounded up)
     turns_used = math.ceil(watered_count / 2)
+
+    check_grown(plots, seeds) # Check - in case the watering boost has hit full growth
     return turns_used
+    
 
 
 def check_grown(plots, seeds):
@@ -1089,5 +1094,6 @@ while True:
 
     if take_turn == True:
         turn = use_turn(turn, animal_info, animals_owned, plots)
+
 
 
